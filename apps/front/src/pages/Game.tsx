@@ -1,20 +1,24 @@
-import React, { useRef, useEffect } from 'react';
+import React, {useRef, useEffect} from 'react';
 
-import { GameWSConnector } from "../api/gameWS";
+import {GameWS} from "../api/game_ws";
 
 export const GamePage = () => {
-    const ws = useRef<GameWSConnector | null>(null);
+    const ws = useRef<GameWS | null>(null);
 
     useEffect(() => {
-        ws.current = new GameWSConnector();
-        ws.current?.connect({
-            handleOpen: () => {},
-            handleClose: () => {},
-            handleError: () => {},
+        ws.current = new GameWS();
+        ws.current?.setConfig({
+            handleOpen: () => {
+            },
+            handleClose: () => {
+            },
+            handleError: () => {
+            },
             handleMessage: (msgEv) => {
                 console.log(msgEv)
-            },
+            }
         })
+        ws.current?.connect()
 
         return () => {
             ws.current?.close();
@@ -22,16 +26,13 @@ export const GamePage = () => {
     }, [])
 
     const handleClickPing = () => {
-        ws.current?.sendMessage('ping');
+        ws.current?.send('ping');
     }
 
-    const handleClickHello = () => {
-        ws.current?.sendMessage('hello');
-    }
-
-    return <>
-        <h1>Game</h1>
-        <button onClick={handleClickPing}>ping</button>
-        <button onClick={handleClickHello}>hello</button>
-    </>
+    return (
+        <>
+            <h1>Game</h1>
+            <button onClick={handleClickPing}>ping</button>
+        </>
+    )
 }

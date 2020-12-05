@@ -1,0 +1,6 @@
+{
+  "plugins": {
+    "postcss-preset-env": true,
+    "tailwindcss": true
+  }
+}
