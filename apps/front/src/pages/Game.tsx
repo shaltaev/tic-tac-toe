@@ -1,38 +1,53 @@
-import React, {useRef, useEffect} from 'react';
+import React, {useState, useEffect, useCallback, FC} from "react";
 
 import {GameWS} from "../api/game_ws";
+import {useInterval} from "../../use/interval";
 
-export const GamePage = () => {
-    const ws = useRef<GameWS | null>(null);
+const useGameWS = () => {
+  const [ws, setWs] = useState<GameWS | null>(null);
+  const [isWs, setIsWs] = useState<boolean>(false);
 
-    useEffect(() => {
-        ws.current = new GameWS();
-        ws.current?.setConfig({
-            handleOpen: () => {
-            },
-            handleClose: () => {
-            },
-            handleError: () => {
-            },
-            handleMessage: (msgEv) => {
-                console.log(msgEv)
-            }
-        })
-        ws.current?.connect()
-
-        return () => {
-            ws.current?.close();
-        }
-    }, [])
-
-    const handleClickPing = () => {
-        ws.current?.send('ping');
+  useEffect(() => {
+    if (ws) {
+      return;
     }
 
-    return (
-        <>
-            <h1>Game</h1>
-            <button onClick={handleClickPing}>ping</button>
-        </>
-    )
+    setWs(GameWS.getInstance());
+  }, [])
+
+  useInterval(() => {
+    if(ws && isWs !== ws.isWsReady) {
+      setIsWs(ws.isWsReady)
+    }
+  }, 5)
+
+
+  return {ws, isWs}
+}
+
+export const GamePage: FC<{ num: number }> = ({ num }) => {
+  const {ws, isWs} = useGameWS();
+
+  useEffect(() => {
+    let unsubscribe = () => {}
+    function listen (ev: MessageEvent) {
+      console.log({num, data: ev.data })
+    }
+
+    if(ws && isWs) {
+      unsubscribe = ws.subscribeMessage(listen)
+    }
+
+    return unsubscribe;
+  }, [isWs, num])
+
+  return (
+    <>
+      <h1>Game</h1>
+      { isWs ? 'true' : 'false'}
+      <br/>
+      <button onClick={() => ws?.send('ping')} disabled={!isWs}>ping</button>
+      <button onClick={() => ws?.send('hm')} disabled={!isWs}>hm</button>
+    </>
+  )
 }

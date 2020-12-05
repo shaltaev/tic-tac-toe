@@ -4,75 +4,79 @@ const GAME_SERVER_URL = "https://localhost:5000";
 
 type Listen<T> = (eventData: T) => void;
 
-interface IConnectConfig {
-    handleOpen: Listen<Event>;
-    handleClose: Listen<CloseEvent>;
-    handleMessage: Listen<MessageEvent>;
-    handleError: Listen<Event>;
+interface IListenerRegistry {
+  close: Listen<CloseEvent>[],
+  message: Listen<MessageEvent>[],
 }
 
 class GameWS {
-    private wsConnect: WebSocket | null = null;
-    private currentConnectionConfig: IConnectConfig | null = null;
+  private static instance: GameWS;
+  private wsConnect: WebSocket | null = null;
 
-    constructor() {
+  isWsReady: boolean = false;
+
+  private listenerRegistry: IListenerRegistry = {
+    close: [],
+    message: [],
+  }
+
+  private constructor() {
+    this.connect();
+  }
+
+  public static getInstance(): GameWS {
+    if (!GameWS.instance) {
+      GameWS.instance = new GameWS();
     }
 
-    setConfig(config: IConnectConfig): boolean {
-        if (!this.wsConnect) {
-            this.currentConnectionConfig = config;
-            return true;
-        }
-        return false;
+    return GameWS.instance;
+  }
+
+  subscribeClose(handler: Listen<CloseEvent>): () => void {
+    this.listenerRegistry.close = [...this.listenerRegistry.close, handler]
+    return () => {
+      this.listenerRegistry.close = this.listenerRegistry.close.filter(h => h !== handler)
     }
+  }
 
-    get(): WebSocket | null {
-        return this.wsConnect
+  subscribeMessage(handler: Listen<MessageEvent>): () => void {
+    this.listenerRegistry.message = [...this.listenerRegistry.message, handler]
+    return () => {
+      this.listenerRegistry.message = this.listenerRegistry.message.filter(h => h !== handler)
     }
+  }
 
-    connect() {
-        if (this.currentConnectionConfig) {
-            const gameWebSocketTemp = new SockJsClient(GAME_SERVER_URL);
-            let openEv: Event | null = null;
+  private connect() {
+    if (!this.wsConnect) {
+      const gameWebSocketTemp = new SockJsClient(GAME_SERVER_URL);
 
-            gameWebSocketTemp.onopen = (ev: Event) => {
-                openEv = ev;
-            };
-            gameWebSocketTemp.onclose = this.currentConnectionConfig.handleClose;
-            gameWebSocketTemp.onmessage = this.currentConnectionConfig.handleMessage;
-            gameWebSocketTemp.onerror = this.currentConnectionConfig.handleError;
+      gameWebSocketTemp.onclose = (ev) => {
+        this.listenerRegistry.close.forEach(l => l(ev))
+      }
+      gameWebSocketTemp.onmessage = (ev) => {
+        this.listenerRegistry.message.forEach(l => l(ev))
+      }
 
-            this.waitSocketIsReady(gameWebSocketTemp, openEv);
-        }
+      this.waitSocketIsReady(gameWebSocketTemp);
     }
+  }
 
-    send(message: any) {
-        if (this.wsConnect) {
-            this.wsConnect.send(message);
-        }
+  send(message: any) {
+    if(this.wsConnect) {
+      this.wsConnect.send(message)
     }
+  }
 
-    close() {
-        if (this.wsConnect) {
-            this.wsConnect.close()
-            this.wsConnect = null
-            this.currentConnectionConfig = null
-        }
-    }
-
-    private waitSocketIsReady(gameWebSocketTemp: WebSocket, openEv: Event | null) {
-        setTimeout(() => {
-            if(gameWebSocketTemp.readyState === 1) {
-                this.wsConnect = gameWebSocketTemp;
-                if(openEv && this.currentConnectionConfig) {
-                    this.currentConnectionConfig.handleOpen(openEv);
-                }
-            } else {
-                this.waitSocketIsReady(gameWebSocketTemp, openEv);
-            }
-        }, 5)
-    }
-
+  private waitSocketIsReady(gameWebSocketTemp: WebSocket) {
+    setTimeout(() => {
+      if(gameWebSocketTemp.readyState === 1) {
+        this.wsConnect = gameWebSocketTemp;
+        this.isWsReady = true;
+      } else {
+        this.waitSocketIsReady(gameWebSocketTemp);
+      }
+    }, 5)
+  }
 }
 
-export { GameWS, IConnectConfig }
+export { GameWS }
