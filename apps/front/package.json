@@ -17,6 +17,7 @@
     "@types/sockjs-client": "^1.5.0",
     "css-loader": "^5.0.1",
     "html-webpack-plugin": "^5.0.0-alpha.15",
+    "postcss": "^8.1.14",
     "postcss-loader": "^4.1.0",
     "postcss-preset-env": "^6.7.0",
     "sockjs-client": "^1.5.0",

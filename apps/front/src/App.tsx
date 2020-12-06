@@ -1,15 +1,18 @@
 import React, { FC, useState } from 'react';
-import {GamePage} from "./pages";
+import {TryConnect, GameBoard} from "./components";
+
+import "./style.global.css"
 
 export const App: FC = () => {
   const [is888, setIs888] = useState(false)
+  const [isGameBoard, setIsGameBoard] = useState(false)
 
   return <>
-    <GamePage num={1}/>
-    <GamePage num={777}/>
-    <br/>
-    <button onClick={() => setIs888(prevState => !prevState)}>888</button>
-    <br/>
-    { is888 && <GamePage num={888} /> }
+    <TryConnect num={1}/>
+    <TryConnect num={777}/>
+    <button className="h-12 p-2 m-2 border border-blue-100 rounded" onClick={() => setIs888(prevState => !prevState)}> show 888</button>
+    { is888 && <TryConnect num={888} /> }
+    <button className="h-12 p-2 m-2 border border-blue-100 rounded" onClick={() => setIsGameBoard(prevState => !prevState)}>show board</button>
+    { isGameBoard && <GameBoard /> }
   </>;
 }
