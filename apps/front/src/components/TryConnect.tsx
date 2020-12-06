@@ -19,10 +19,10 @@ export const TryConnect: FC<{ num: number }> = ({ num }) => {
   }, [isWs, num])
 
   return (
-    <div className="flex flex-row">
-      <span className="h-6 p-2">ws: { isWs ? 'true' : 'false'}</span>
-      <button className="h-6 p-2" onClick={() => ws?.send('ping')} disabled={!isWs}>ping</button>
-      <button className="h-6 p-2" onClick={() => ws?.send('hm')} disabled={!isWs}>hm</button>
+    <div className="flex flex-row h-12">
+      <span className="h-full p-2">ws: { isWs ? 'true' : 'false'}</span>
+      <button className="h-full p-2" onClick={() => ws?.send('ping')} disabled={!isWs}>ping</button>
+      <button className="h-full p-2" onClick={() => ws?.send('hm')} disabled={!isWs}>hm</button>
     </div>
   )
 }

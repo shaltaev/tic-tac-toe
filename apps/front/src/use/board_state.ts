@@ -4,8 +4,23 @@ import {FirstStep, Step, TicTacMap} from "../models";
 
 export const useBoardState = () => {
     const {ws, isWs} = useGameWS();
-    const [board, setBoard] = useState<TicTacMap | []>([])
-    const [step, setStep] = useState<Step | FirstStep | null>(null)
+    const [board, setBoard] = useState<TicTacMap | null>(null)
+    const [steps, setSteps] = useState<(FirstStep | Step)[] | null>(null)
+    const [currentStepId, setCurrentStepId] = useState<number | null>(null)
+
+    useEffect(() => {
+      if(ws && isWs) {
+        ws.send(JSON.stringify({type: 'getBoardState'}))
+      }
+    }, [ws, isWs])
+
+    useEffect(() => {
+      if(steps) {
+        steps.length === 0 ?
+          setCurrentStepId(() => null) :
+          setCurrentStepId(() => steps.slice(-1)[0].id)
+      }
+    }, [steps])
 
     useEffect(() => {
         let unsubscribe = () => {
@@ -15,10 +30,10 @@ export const useBoardState = () => {
             try {
                 const parsedData = ev.data[0] === '{' ? JSON.parse(ev.data) : ev.data;
                 if (parsedData.payload?.map) {
-                    setBoard(parsedData.payload?.map)
+                    setBoard(() => parsedData.payload?.map)
                 }
-                if (parsedData.payload?.step) {
-                    setStep(parsedData.payload?.step)
+                if (parsedData.payload?.steps) {
+                    setSteps(() => parsedData.payload?.steps)
                 }
             } catch (e) {
                 console.log(e)
@@ -30,7 +45,7 @@ export const useBoardState = () => {
         }
 
         return unsubscribe;
-    }, [isWs, step])
+    }, [isWs, steps])
 
-    return {ws, isWs, board, step}
+    return {ws, isWs, board, steps, currentStepId}
 }

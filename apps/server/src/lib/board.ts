@@ -35,19 +35,14 @@ export class Board {
     return Board.instance;
   }
 
-  getMap() {
-    return this.map
-  }
-
-  getLastStep() {
-    const stepArr = this.steps.slice(-1);
-    return stepArr.length > 0 ? stepArr[0] : null;
+  getCurrentMapState() {
+    return { map: this.map, steps: this.steps }
   }
 
   clear() {
     this.steps = [];
     this.map = getClearMap();
-    return { result: true, payload: { map: this.map } }
+    return { result: true }
   }
 
   firstStep(newStepData: Pick<Step, 'field'>) {
@@ -60,9 +55,9 @@ export class Board {
     if (isStepsLengthZero && isMapEmpty && isFieldCorrect) {
       this.steps = [step]
       this.map = [...this.map.slice(0, newStepData.field), CellValues.O, ...this.map.slice(newStepData.field + 1)] as TicTacMap;
-      return { result: true, payload: { map: this.map, step } }
+      return { result: true }
     } else {
-      return { result: false, payload: { map: this.map, step } }
+      return { result: false }
     }
   }
 
@@ -77,9 +72,9 @@ export class Board {
     if (isProgression && isFieldCorrect && isFieldEmpty && isStepsLengthMoreThenZero) {
       this.steps = [this.steps[0], ...this.steps.slice(1, this.steps.length), step]
       this.map = [...this.map.slice(0, newStepData.field), this.steps.length % 2 === 1 ? CellValues.O : CellValues.X, ...this.map.slice(newStepData.field + 1)] as TicTacMap;
-      return { result: true, payload: { map: this.map, step } }
+      return { result: true }
     } else {
-      return { result: false, payload: { map: this.map, step } }
+      return { result: false }
     }
   }
 }

@@ -18,42 +18,40 @@ let connPool: Connection[] = [];
 
 const handleFirstStep = (payload, connection) => {
   const data = ticTacToeBoard.firstStep(payload);
-  const serialized = JSON.stringify({type: 'firstStepIsHappen', payload: data.payload})
+  const serialized = JSON.stringify({type: 'firstStepIsHappen', payload: ticTacToeBoard.getCurrentMapState()})
   if (data.result) {
     connPool.forEach(c => c.write(serialized))
   } else {
-    connection.write(JSON.stringify({type: 'yourFirstStepIsFailed', payload: data.payload}))
+    connection.write(JSON.stringify({type: 'yourFirstStepIsFailed', payload: ticTacToeBoard.getCurrentMapState()}))
   }
 }
 
 const handleStep = (payload, connection) => {
   const data = ticTacToeBoard.newStep(payload);
-  const serialized = JSON.stringify({type: 'stepIsHappen', payload: data.payload})
+  const serialized = JSON.stringify({type: 'stepIsHappen', payload: ticTacToeBoard.getCurrentMapState()})
   if (data.result) {
     connPool.forEach(c => c.write(serialized))
   } else {
-    connection.write(JSON.stringify({type: 'yourStepIsFailed', payload: data.payload}))
+    connection.write(JSON.stringify({type: 'yourStepIsFailed', payload: ticTacToeBoard.getCurrentMapState()}))
   }
 }
 
 const handleClear = () => {
   const data = ticTacToeBoard.clear()
   if (data.result) {
-    const serialized = JSON.stringify({type: 'mapIsCleared', payload: data.payload})
+    const serialized = JSON.stringify({type: 'mapIsCleared', payload: ticTacToeBoard.getCurrentMapState()})
     connPool.forEach(c => c.write(serialized))
   }
 }
 
 const handleGetBoardState = (connection) => {
-  connection.write(JSON.stringify(getCurrentMapState()))
+  connection.write(JSON.stringify({type: 'currentMap', payload: ticTacToeBoard.getCurrentMapState()}))
 }
-
-const getCurrentMapState = () => ({type: 'currentMap', payload: {map: ticTacToeBoard.getMap(), step: ticTacToeBoard.getLastStep()}})
 
 wsServer.on('connection', (connection: Connection) => {
   connPool = [...connPool, connection];
 
-  connection.write(JSON.stringify(getCurrentMapState()))
+  connection.write(JSON.stringify({type: 'currentMap', payload: ticTacToeBoard.getCurrentMapState()}))
 
   connection.on('data', message => {
     try {

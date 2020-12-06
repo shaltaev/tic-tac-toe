@@ -6,7 +6,7 @@ import {ClearGameBoard} from "./ClearGameBoard";
 import {ListOfCell} from "./ListOfGameBoardCell";
 
 export const GameBoard: FC = () => {
-  const {ws, board, isWs} = useBoardState();
+  const {ws, isWs, board} = useBoardState();
 
   const handleGetBoardState = () => {
     if (ws && isWs) {
@@ -18,7 +18,7 @@ export const GameBoard: FC = () => {
     <>
       <ClearGameBoard />
       <br />
-      {board.length > 0 ?
+      {board && board.length > 0 ?
         <ul className="grid grid-cols-3 gap-2">
           <ListOfCell map={board as TicTacMap}/>
         </ul>
