@@ -1,0 +1,22 @@
+.box {margin-top: 1rem}
+
+.clear {}
+
+.control {}
+
+.board {}
+
+.map {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 1rem;
+    list-style: none;
+    width: min-content;
+}
+
+.cell {
+    display: block;
+    width: 40px;
+    height: 40px;
+    background-color: #61dafb;
+}

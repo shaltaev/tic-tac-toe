@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "dev:start": "concurrently \"yarn dev:front\" \"yarn dev:server\"",
-    "dev:front": "cd apps/front/ && yarn dev",
+    "dev:front": "cd apps/front/ && yarn start",
     "dev:server": "cd apps/server/ && yarn dev"
   },
   "devDependencies": {
