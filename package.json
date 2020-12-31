@@ -1,0 +1,15 @@
+{
+  "name": "tic-tac-toe",
+  "version": "0.0.1",
+  "repository": "git@github.com:shaltaev/tic-tac-toe.git",
+  "author": "shaltaev <gleb.shaltaev@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev:start": "concurrently \"yarn dev:front\" \"yarn dev:server\"",
+    "dev:front": "cd apps/front/ && yarn start",
+    "dev:server": "cd apps/server/ && yarn dev"
+  },
+  "devDependencies": {
+    "concurrently": "^5.3.0"
+  }
+}
